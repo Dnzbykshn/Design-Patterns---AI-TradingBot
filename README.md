@@ -98,7 +98,7 @@ mvn clean compile
 ### Step 4: Run the Trading Bot
 
 ```bash
-mvn exec:java -Dexec.mainClass="com.tradingbot.TradingBotMain"
+mvn exec:java "-Dexec.mainClass=com.tradingbot.TradingBotMain"
 ```
 
 Or if you prefer to run the JAR:
