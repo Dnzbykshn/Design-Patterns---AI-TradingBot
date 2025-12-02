@@ -158,6 +158,18 @@ When you run the application:
   4. Logging (Concrete)
 - **Benefit:** Ensures all strategies follow the same execution flow
 
+### 4. Factory Method Pattern (`com.tradingbot.factory`)
+
+**Purpose:** Encapsulate strategy object creation logic and follow Open/Closed Principle.
+
+- **Creator (Abstract)**: `StrategyFactory` - defines factory method `createStrategy()`
+- **Concrete Creators**: `RSIStrategyFactory`, `AIStrategyFactory` - implement factory method
+- **Product**: `TradingStrategy` instances (RSIStrategy, AIStrategy)
+- **Benefit:** 
+  - Adding new strategies doesn't require modifying client code (TradingBotMain)
+  - Strategy creation logic is centralized and reusable
+  - Follows Open/Closed Principle - open for extension, closed for modification
+
 ## 📊 Domain Model
 
 ### MarketCandle
@@ -190,6 +202,10 @@ mvn test
 ## 🎓 Academic Context
 
 This project was built for a **Design Patterns** course, demonstrating:
+- **Observer Pattern**: Event-driven market data distribution
+- **Strategy Pattern**: Interchangeable trading algorithms
+- **Template Method Pattern**: Consistent trading lifecycle
+- **Factory Method Pattern**: Encapsulated object creation
 - Strict adherence to pattern definitions
 - Comprehensive JavaDoc documentation
 - Pattern naming conventions
