@@ -2,9 +2,9 @@ package com.tradingbot;
 
 import com.tradingbot.bot.BotObserver;
 import com.tradingbot.domain.Wallet;
+import com.tradingbot.factory.StrategyFactory;
 import com.tradingbot.observer.MarketDataSubject;
 import com.tradingbot.strategy.AIStrategy;
-import com.tradingbot.strategy.RSIStrategy;
 import com.tradingbot.strategy.TradingStrategy;
 
 import java.util.Scanner;
@@ -46,41 +46,45 @@ public class TradingBotMain {
         System.out.println("2. AI Strategy (ML-based)");
         System.out.print("Enter choice (1 or 2): ");
 
-        int choice = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        String choice = scanner.nextLine().trim();
+        
+        Wallet wallet = new Wallet(INITIAL_BALANCE);
+        TradingStrategy strategy = null;
+        BotObserver bot = null;
+        String botName = "RSI-Bot";
 
-        TradingStrategy strategy;
-        BotObserver bot;
-
-        if (choice == 1) {
-            // RSI Strategy
-            Wallet wallet = new Wallet(INITIAL_BALANCE);
-            strategy = new RSIStrategy(wallet);
+        try {
+            // Use Factory Method Pattern to create strategy
+            StrategyFactory factory = StrategyFactory.getFactory(choice);
+            
+            // Get additional config if needed (e.g., model path for AI)
+            String[] config = null;
+            if (choice.equals("2") || choice.equalsIgnoreCase("AI")) {
+                System.out.print("Enter path to ONNX model file (or press Enter for 'ai_model/trading_model.onnx'): ");
+                String modelPath = scanner.nextLine().trim();
+                config = new String[]{modelPath};
+                botName = "AI-Bot";
+            }
+            
+            // Factory creates the strategy
+            strategy = factory.createAndConfigureStrategy(wallet, config);
+            bot = new BotObserver(botName, strategy);
+            
+            String strategyName = choice.equals("2") || choice.equalsIgnoreCase("AI") ? "AI" : "RSI";
+            System.out.println("✓ " + strategyName + " Strategy created using Factory Method Pattern");
+            
+        } catch (IllegalArgumentException e) {
+            System.err.println("❌ Invalid choice: " + e.getMessage());
+            System.err.println("   Falling back to RSI Strategy...");
+            StrategyFactory factory = StrategyFactory.getFactory("RSI");
+            strategy = factory.createStrategy(wallet);
             bot = new BotObserver("RSI-Bot", strategy);
-            System.out.println("✓ RSI Strategy selected");
-        } else if (choice == 2) {
-            // AI Strategy
-            System.out.print("Enter path to ONNX model file (or press Enter for 'ai_model/trading_model.onnx'): ");
-            String modelPath = scanner.nextLine().trim();
-            if (modelPath.isEmpty()) {
-                modelPath = "ai_model/trading_model.onnx";
-            }
-
-            Wallet wallet = new Wallet(INITIAL_BALANCE);
-            try {
-                strategy = new AIStrategy(wallet, modelPath);
-                bot = new BotObserver("AI-Bot", strategy);
-                System.out.println("✓ AI Strategy selected");
-            } catch (Exception e) {
-                System.err.println("❌ Failed to load AI model: " + e.getMessage());
-                System.err.println("   Falling back to RSI Strategy...");
-                strategy = new RSIStrategy(wallet);
-                bot = new BotObserver("RSI-Bot", strategy);
-            }
-        } else {
-            System.out.println("Invalid choice. Using RSI Strategy by default.");
-            Wallet wallet = new Wallet(INITIAL_BALANCE);
-            strategy = new RSIStrategy(wallet);
+        } catch (Exception e) {
+            System.err.println("❌ Failed to create strategy: " + e.getMessage());
+            e.printStackTrace();
+            System.err.println("   Falling back to RSI Strategy...");
+            StrategyFactory factory = StrategyFactory.getFactory("RSI");
+            strategy = factory.createStrategy(wallet);
             bot = new BotObserver("RSI-Bot", strategy);
         }
 
@@ -91,10 +95,10 @@ public class TradingBotMain {
 
         // Display initial wallet state
         if (strategy instanceof com.tradingbot.strategy.BaseTradingStrategy) {
-            Wallet wallet = ((com.tradingbot.strategy.BaseTradingStrategy) strategy).getWallet();
+            Wallet strategyWallet = ((com.tradingbot.strategy.BaseTradingStrategy) strategy).getWallet();
             System.out.println("Initial Wallet State:");
-            System.out.println("  USDT Balance: " + wallet.getUsdtBalance());
-            System.out.println("  Coin Balance: " + wallet.getCoinBalance());
+            System.out.println("  USDT Balance: " + strategyWallet.getUsdtBalance());
+            System.out.println("  Coin Balance: " + strategyWallet.getCoinBalance());
             System.out.println();
         }
 
@@ -115,12 +119,12 @@ public class TradingBotMain {
 
         // Display final wallet state
         if (strategy instanceof com.tradingbot.strategy.BaseTradingStrategy) {
-            Wallet wallet = ((com.tradingbot.strategy.BaseTradingStrategy) strategy).getWallet();
+            Wallet strategyWallet = ((com.tradingbot.strategy.BaseTradingStrategy) strategy).getWallet();
             System.out.println("\nFinal Wallet State:");
-            System.out.println("  USDT Balance: " + String.format("%.2f", wallet.getUsdtBalance()));
-            System.out.println("  Coin Balance: " + String.format("%.2f", wallet.getCoinBalance()));
-            System.out.println("  Total Value: " + String.format("%.2f", wallet.getTotalValue(wallet.getCurrentPrice())));
-            System.out.println("  PnL: " + String.format("%.2f%%", wallet.getPnLPercentage(wallet.getCurrentPrice())));
+            System.out.println("  USDT Balance: " + String.format("%.2f", strategyWallet.getUsdtBalance()));
+            System.out.println("  Coin Balance: " + String.format("%.2f", strategyWallet.getCoinBalance()));
+            System.out.println("  Total Value: " + String.format("%.2f", strategyWallet.getTotalValue(strategyWallet.getCurrentPrice())));
+            System.out.println("  PnL: " + String.format("%.2f%%", strategyWallet.getPnLPercentage(strategyWallet.getCurrentPrice())));
         }
 
         // Cleanup
