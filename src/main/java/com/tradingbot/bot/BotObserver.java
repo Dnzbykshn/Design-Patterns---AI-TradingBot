@@ -1,6 +1,7 @@
 package com.tradingbot.bot;
 
 import com.tradingbot.domain.MarketCandle;
+import com.tradingbot.domain.Signal;
 import com.tradingbot.observer.Observer;
 import com.tradingbot.strategy.TradingStrategy;
 
@@ -25,6 +26,9 @@ public class BotObserver implements Observer {
         this.strategy = strategy;
     }
 
+    private Signal lastSignal = Signal.HOLD;
+    private MarketCandle lastCandle = null;
+    
     /**
      * Called by the Subject (MarketDataSubject) when a new market candle is available.
      * This method delegates to the strategy's template method for processing.
@@ -33,17 +37,30 @@ public class BotObserver implements Observer {
      */
     @Override
     public void update(MarketCandle candle) {
+        this.lastCandle = candle;
+        
         // If strategy is BaseTradingStrategy, use the template method
         if (strategy instanceof com.tradingbot.strategy.BaseTradingStrategy) {
             com.tradingbot.strategy.BaseTradingStrategy baseStrategy = 
                 (com.tradingbot.strategy.BaseTradingStrategy) strategy;
             baseStrategy.executeStrategyTemplate(candle);
+            
+            // Extract signal for GUI display
+            lastSignal = baseStrategy.analyze(candle);
         } else {
             // Fallback: just analyze and log (for custom strategies)
-            com.tradingbot.domain.Signal signal = strategy.analyze(candle);
+            lastSignal = strategy.analyze(candle);
             System.out.println(String.format("[%s] Signal: %s | Price: %.2f", 
-                botName, signal, candle.getClose()));
+                botName, lastSignal, candle.getClose()));
         }
+    }
+    
+    public Signal getLastSignal() {
+        return lastSignal;
+    }
+    
+    public MarketCandle getLastCandle() {
+        return lastCandle;
     }
 
     public String getBotName() {

@@ -97,20 +97,56 @@ mvn clean compile
 
 ### Step 4: Run the Trading Bot
 
+**Option 1: GUI Mode (Recommended) 🖥️**
+
+```bash
+mvn exec:java "-Dexec.mainClass=com.tradingbot.gui.TradingBotGUI"
+```
+
+Or use the batch script:
+```bash
+run-gui.bat
+```
+
+**Option 2: Terminal Mode**
+
 ```bash
 mvn exec:java "-Dexec.mainClass=com.tradingbot.TradingBotMain"
 ```
 
-Or if you prefer to run the JAR:
+**Option 3: JAR Mode**
 
 ```bash
 mvn package
-java -cp target/ai-trading-bot-1.0.0.jar com.tradingbot.TradingBotMain
+java -cp target/ai-trading-bot-1.0.0.jar com.tradingbot.gui.TradingBotGUI
 ```
 
 ## 🎮 Usage
 
-When you run the application:
+### GUI Mode (Recommended)
+
+1. **Launch the GUI:**
+   ```bash
+   mvn exec:java "-Dexec.mainClass=com.tradingbot.gui.TradingBotGUI"
+   ```
+
+2. **Select Strategy:**
+   - Choose "RSI Strategy" or "AI Strategy" from dropdown
+   - If AI Strategy, enter model path (or use default)
+
+3. **Start Trading:**
+   - Click "Start Bot" button
+   - Watch real-time updates:
+     - Wallet status (USDT, Coin, Total Value, PnL)
+     - Current market price
+     - Last trading signal (BUY/SELL/HOLD)
+     - Trading logs in console area
+
+4. **Stop Trading:**
+   - Click "Stop Bot" button
+   - Final statistics will be displayed in logs
+
+### Terminal Mode
 
 1. **Select Strategy:**
    - `1` for RSI Strategy (Math-based)
