@@ -242,7 +242,7 @@ def main():
     with open(output_path, 'wb') as f:
         f.write(onnx_model.SerializeToString())
     
-    print(f"\n✓ Model exported to: {output_path}")
+    print(f"\n[OK] Model exported to: {output_path}")
     print(f"  File size: {os.path.getsize(output_path) / 1024:.2f} KB")
     
     # Print expected input shape
@@ -261,7 +261,7 @@ def main():
     print("  - 1 = BUY signal")
     print("=" * 60)
     
-    print("\n✓ Training complete!")
+    print("\n[OK] Training complete!")
 
 if __name__ == '__main__':
     main()
